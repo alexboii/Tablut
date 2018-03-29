@@ -16,6 +16,8 @@ import java.util.Random;
 public class StudentPlayer extends TablutPlayer {
 
     private Random rand = new Random(1848);
+    private int opponent;
+    private short MAX_TURN = 100;
 
     /**
      * You must modify this constructor to return your student number. This is
@@ -24,6 +26,12 @@ public class StudentPlayer extends TablutPlayer {
      */
     public StudentPlayer() {
         super("260684228");
+
+        if (player_id == TablutBoardState.SWEDE) {
+            this.opponent = TablutBoardState.MUSCOVITE;
+        } else {
+            this.opponent = TablutBoardState.SWEDE;
+        }
     }
 
     /**
@@ -44,8 +52,7 @@ public class StudentPlayer extends TablutPlayer {
 
         TablutBoardState randomState = (TablutBoardState) boardState.clone();
         randomState.processMove(myMove);
-        int opponent = randomState.getOpponent();
-        int min = randomState.getNumberPlayerPieces(opponent);
+        int min = randomState.getNumberPlayerPieces(this.opponent);
         int startingState = min;
 
         // we set current state as root
@@ -56,7 +63,7 @@ public class StudentPlayer extends TablutPlayer {
 
             cloneBS.processMove(currentMove);
 
-            int result = this.alphaBeta(cloneBS, 3, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
+            int result = this.alphaBeta(cloneBS, MAX_TURN, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
 
             if (result <= min) {
                 myMove = currentMove;
@@ -88,7 +95,7 @@ public class StudentPlayer extends TablutPlayer {
             }
         }
         
-        
+        MAX_TURN--;
         // Return your move to be processed by the server.
         return myMove;
     }
@@ -96,8 +103,7 @@ public class StudentPlayer extends TablutPlayer {
     private int alphaBeta(TablutBoardState board, int depth, int alpha, int beta, boolean maximizingPlayer) {
         // TODO: add an "isWinner" clause or "isTerminal"
         if (depth == 0) {
-            int opponent = board.getOpponent();
-            int result = board.getNumberPlayerPieces(opponent);
+            int result = board.getNumberPlayerPieces(this.opponent);
             return result;
         }
 
@@ -134,7 +140,28 @@ public class StudentPlayer extends TablutPlayer {
     }
 
     private boolean checkTerminal(TablutBoardState board) {
-        return board.getWinner() == player_id || board.getWinner() == board.getOpponent();
+        return board.getWinner() == player_id || board.getWinner() == this.opponent;
+    }
+
+    private short evaluateMove(TablutBoardState board){
+        return (player_id == TablutBoardState.SWEDE)? evaluateSwede(board) : evaluateMuscovite(board);
+    }
+
+    private short evaluateSwede(TablutBoardState board){
+        return 0;
+    }
+
+    private short evaluateMuscovite(TablutBoardState board){
+
+        if(board.getWinner() == TablutBoardState.MUSCOVITE){
+            return Short.MAX_VALUE;
+        }
+
+        if(board.getWinner() == TablutBoardState.SWEDE){
+            return Short.MIN_VALUE;
+        }
+
+        return 0;
     }
 
 }
