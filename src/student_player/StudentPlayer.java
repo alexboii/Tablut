@@ -92,9 +92,29 @@ public class StudentPlayer extends TablutPlayer {
         short bestValue = Short.MIN_VALUE;
         TablutMove bestMove = options.get(rand.nextInt(options.size()));
 
+        Coord kingPos = board.getKingPosition();
+        int minDistance = Coordinates.distanceToClosestCorner(kingPos);
+
         for (TablutMove move : options) {
+
+
             TablutBoardState cloneBS = (TablutBoardState) board.clone();
             cloneBS.processMove(move);
+
+            if(cloneBS.getWinner() == player_id){
+                return move;
+            }
+
+            int moveDistance = Coordinates.distanceToClosestCorner(move.getEndPosition());
+
+            // perform a quick, greedy move if we can
+            if(this.player_id == TablutBoardState.SWEDE){
+                if(moveDistance < minDistance){
+                    if(isMoveSafe(cloneBS)){
+                        return move;
+                    }
+                }
+            }
 
             value = (short) -this.negamax(cloneBS, (short) (depth - 1), (short) -beta, (short) -alpha, (short) -color);
 
@@ -175,35 +195,26 @@ public class StudentPlayer extends TablutPlayer {
 
         int minDistance = Coordinates.distanceToClosestCorner(kingPos);
 
-        short numberOfMoves = 0;
-        for (TablutMove move : board.getLegalMovesForPosition(kingPos)) {
-            int moveDistance = Coordinates.distanceToClosestCorner(move.getEndPosition());
-            if (moveDistance < minDistance ) {
-                TablutBoardState cloneBS = (TablutBoardState) board.clone();
-                cloneBS.processMove(move);
-                if(isMoveSafe(cloneBS)) {
-                    minDistance = moveDistance;
-                }
-            }
-
-            numberOfMoves++;
-        }
 
         short score = 0;
         for (Coord coord : board.getPlayerPieceCoordinates()) {
-            score -= coord.distance(kingPos);
+            score += coord.distance(kingPos);
         }
 
         for (Coord coord : board.getOpponentPieceCoordinates()) {
-            score += coord.distance(kingPos);
+            score -= coord.distance(kingPos);
         }
 
         short opponentPieceCount = (short) board.getNumberPlayerPieces(this.opponent);
         short myPieceCount = (short) board.getPlayerPieceCoordinates().size();
-        short pieceAdvantage = (short) (myPieceCount - opponentPieceCount);
+        short pieceAdvantage = (short) (myPieceCount);
 
+        // the more legal moves I have, the better
+        short legalMoves = (short) board.getAllLegalMoves().size();
+
+//        System.out.println(pieceAdvantage + " " + score + " "  + minDistance + " " + (pieceAdvantage + score - minDistance));
         // the further you are from corner, the more you get penalized
-        return (short)(pieceAdvantage + score + numberOfMoves - minDistance);
+        return (short) (pieceAdvantage + score - minDistance);
     }
 
     private short evaluateMuscovite(TablutBoardState board) {
