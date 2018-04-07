@@ -214,7 +214,7 @@ public class StudentPlayer extends TablutPlayer {
 
 //        System.out.println(pieceAdvantage + " " + score + " "  + minDistance + " " + (pieceAdvantage + score - minDistance));
         // the further you are from corner, the more you get penalized
-        return (short) (pieceAdvantage + score - minDistance);
+        return (short) (2 * pieceAdvantage + score - minDistance);
     }
 
     private short evaluateMuscovite(TablutBoardState board) {
