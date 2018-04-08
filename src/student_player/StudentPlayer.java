@@ -15,9 +15,9 @@ import java.util.*;
 public class StudentPlayer extends TablutPlayer {
 
     private Random rand = new Random(1848);
-    private int opponent;
+    private final int opponent = (player_id == TablutBoardState.SWEDE)? TablutBoardState.MUSCOVITE : TablutBoardState.SWEDE;
     private short MAX_DEPTH = 3;
-    private HashMap<HashPair, HashEntry> cache;
+    private final HashMap<HashPair, HashEntry> cache = new HashMap<>();
 
     /**
      * You must modify this constructor to return your student number. This is
@@ -26,14 +26,6 @@ public class StudentPlayer extends TablutPlayer {
      */
     public StudentPlayer() {
         super("260684228");
-
-        if (player_id == TablutBoardState.SWEDE) {
-            this.opponent = TablutBoardState.MUSCOVITE;
-        } else {
-            this.opponent = TablutBoardState.SWEDE;
-        }
-
-        this.cache = new HashMap<>();
     }
 
     /**
